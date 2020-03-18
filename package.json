@@ -1,0 +1,27 @@
+{
+  "name": "inspired-blogs-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lishenyu16/inspired-blogs-server.git"
+  },
+  "author": "Shenyu LI",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lishenyu16/inspired-blogs-server/issues"
+  },
+  "homepage": "https://github.com/lishenyu16/inspired-blogs-server#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "morgan": "^1.9.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  }
+}
