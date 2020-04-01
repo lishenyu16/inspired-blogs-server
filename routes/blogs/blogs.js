@@ -23,10 +23,53 @@ router.post('/addBlog', isAuthMiddleware, async (req, res) => {
         })
     }
 })
-
-router.post('/fetchBlogs', async (req,res) => {
+router.post('/editBlog', isAuthMiddleware, async (req, res) => {
+    const userId = req.userId;
+    const blogId = req.body.blogId;
+    const blogTitle = req.body.blogTitle;
+    const blogContent = req.body.blogContent;
     try {
-        const query = `select * from blogs`;
+        const findBlogSql = `select * from blogs where blog_id = $1`;
+        const newBlogSql = `select b.*, a.username from blogs b inner join accounts a on b.user_id = a.user_id where blog_id = $1`;
+        const updateSql = `
+        update 
+            blogs 
+        set 
+            blog_title = $1, 
+            blog_content = $2, 
+            last_edited_on = current_timestamp 
+        where 
+            blog_id = $3
+        returning *`;
+        const blog = await pool.query(findBlogSql, [blogId]);
+        if (blog.rows[0].user_id == userId){
+            await pool.query(updateSql, [blogTitle, blogContent, blogId]);
+            const result2 = await pool.query(newBlogSql, [blogId]);
+            res.status(200).json({
+                success: true,
+                blog: result2.rows[0],
+                message: 'Successfully edited this blog.'
+            })
+        }
+        else {
+            res.status(401).json({
+                success: false,
+                message: 'You have no authorization to edit this blog'
+            })
+        }
+    }
+    catch(err){
+        console.log(err);
+        res.statusCode(400).json({
+            success: false,
+            message: 'Failed to edit this blog: ' + err
+        })
+    }
+})
+
+router.get('/fetchBlogs', async (req,res) => {
+    try {
+        const query = `select b.*, a.username from blogs b inner join accounts a on b.user_id = a.user_id`;
         const result = await pool.query(query);
         res.status(200).json({
             success: true,
@@ -37,6 +80,48 @@ router.post('/fetchBlogs', async (req,res) => {
         res.status(400).json({
             success: false,
             message: 'failed to fetch blogs'
+        })
+    }
+})
+
+router.get('/blogDetail/:blog_id', async (req,res) => {
+    try {
+        let blog_id = req.params.blog_id;
+        if (isNaN(blog_id) || blog_id < 0){
+            return res.status(400).json({
+                success:false,
+                message:'Invalid blog id provided: ' + blog_id,
+            })
+        }
+        const query = `
+            select 
+                b.*, a.username
+            from 
+                blogs b
+            inner join
+                accounts a
+            on
+                b.user_id = a.user_id
+            where 
+                blog_id = $1 `;
+        const result = await pool.query(query,[blog_id]);
+        if (result.rows.length>0){
+            res.status(200).json({
+                success: true,
+                blog: result.rows[0]
+            })
+        }
+        else {
+            res.status(200).json({
+                success: false,
+                message: 'Blog not found'
+            })
+        }
+    }
+    catch(err) {
+        res.status(400).json({
+            success: false,
+            message: 'Failed to fetch blog, server issue'
         })
     }
 })

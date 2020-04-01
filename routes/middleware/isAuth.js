@@ -16,13 +16,13 @@ module.exports = (req, res, next) => {
     }
     catch(err){
         console.log(err);
-        res.status(400).json({
+        return res.status(400).json({
             success: false,
             message: 'Failed to verify token: ' + err
         })
     }
     if(!decodeToken){
-        res.status(200).json({
+        return res.status(401).json({
             success: false,
             message: 'Invalid token or expired',
         })
