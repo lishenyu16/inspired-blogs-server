@@ -28,6 +28,17 @@ router.post('/signIn', async (req, res) => {
         const result = await pool.query(query,[email]);
         if (result.rows.length > 0){
             let user = result.rows[0];
+            if (!user.is_email_confirmed){
+                if (user.hash_expiration_time <= new Date().getTime()){
+                    //expired, resend confirmation email
+                }
+                else {
+                    return res.status(401).json({
+                        success: false,
+                        message: 'A confirmation email has been resent to your email, please check your inbox as well as your spam folder.',
+                    })
+                }
+            }
             const encryptedPw = user.password;
             bcrypt.compare(password, encryptedPw)
             .then( async domatch=>{
@@ -50,7 +61,7 @@ router.post('/signIn', async (req, res) => {
                 else {
                     res.status(200).json({
                         success: false,
-                        message: 'Password does not match.'
+                        message: 'Incorrect password.'
                     })
                 }
             })
@@ -86,8 +97,8 @@ router.post('/signUp', async (req, res) => {
         const queryExiting = `select * from accounts where email = $1`;
         const queryInsert = `
         insert into 
-            accounts(username,password,email,created_on,is_admin,is_email_confirmed,hash,hash_expiration_date)
-        values($1,$2,$3,$4,false,false,$5,$6)`;
+            accounts(username,password,email,created_on,is_admin,is_email_confirmed,hash,hash_expiration_time)
+        values($1,$2,$3,$4,false,false,$5,$6) returning user_id`;
         const result = await pool.query(queryExiting,[email]);
         if (result.rows.length > 0){
             res.status(200).json({
@@ -99,21 +110,36 @@ router.post('/signUp', async (req, res) => {
             const pw_hash = await bcrypt.hash(password, saltRounds);
             let verificationCode = uuid();
             const verificationHash = await bcrypt.hash(verificationCode, saltRounds);
-            await pool.query(queryInsert,[username,pw_hash,email,new Date(),verificationHash,new Date().getTime()+10*60*1000]);
+            const result_userId = await pool.query(queryInsert,[username,pw_hash,email,new Date(),verificationHash,new Date().getTime()+24*60*60*1000]);
             transporter.sendMail({
                 to: email,
                 from: 'inspiredblogs@gmail.com',
-                subject: 'Signup succeeded!',
-                html: `<h1>Please verify your email by clicking on the following link:</h1>
-                        <div style="width:100%;text-align:center;">
-                            <a style="padding:5px;background-color:cyan;text-decoration:none" href="http://shenyu16.com/confirmEmail/${verificationCode}/${email.toLowerCase()}">Confirm Email Address</a>
-                        </div>`
+                subject: 'Inspired Blogs Email Confirmation',
+                html: process.env.NODE_ENV === "production"?
+                    `<h1>Please verify your email by clicking on the following link:</h1>
+                    <div style="width:100%;text-align:center;">
+                        <a style="padding:5px;background-color:cyan;text-decoration:none" 
+                        href="http://shenyu16.com/confirmEmail/${verificationCode}/${result_userId.rows[0].user_id}">Confirm Email Address</a>
+                    </div>`
+                    :
+                    `<h1>Please verify your email by clicking on the following link:</h1>
+                    <div style="width:100%;text-align:center;">
+                        <a style="padding:5px;background-color:cyan;text-decoration:none" 
+                        href="http://localhost:8080/confirmEmail/${verificationCode}/${result_userId.rows[0].user_id}">Confirm Email Address</a>
+                    </div>`
             })
             .then(re=>{
                 console.log(re);
                 res.status(200).json({
                     success: true,
                     message: 'Sign up successfully, need to verify email address'
+                })
+            })
+            .catch(err=>{
+                console.log(err);
+                res.status(400).json({
+                    success: false,
+                    message: 'Something wrong happened to our server'
                 })
             })
         }
@@ -129,39 +155,31 @@ router.post('/signUp', async (req, res) => {
 
 router.post('/confirmEmail', async (req, res) =>{
     try {
-        let email = req.params.email;
-        let verificaitonCode = req.params.verificaitonCode;
-        let pendinguser_sql = `select * from accounts where email = $1`;
-        let confirmedEmail_sql = `update accounts set is_email_confirmed = true where email = $1`;
-        const result = await pool.query(pendinguser_sql,[email]);
+        let userId = req.body.userId;
+        let verificationCode = req.body.verificationCode;
+        let pendinguser_sql = `select * from accounts where user_id = $1`;
+        let confirmedEmail_sql = `update accounts set is_email_confirmed = true where user_id = $1`;
+        const result = await pool.query(pendinguser_sql,[userId]);
         if (result.rows.length > 0){
             let user = result.rows[0];
             let hashedCode = user.hash;
-            let hashExpirationTime = user.hash_expiration_date;
+            let hashExpirationTime = user.hash_expiration_time;
             let currentTime = new Date().getTime();
             if (currentTime <= hashExpirationTime){
-                bcrypt.compare(verificaitonCode, hashedCode)
-                .then(async domatch=>{
-                    if (domatch){
-                        await pool.query(confirmedEmail_sql,[email]);
-                        return res.status(200).json({
-                            success: true,
-                            message: 'successfully verified email'
-                        })
-                    }
-                    else {
-                        return res.status(401).json({
-                           success: false,
-                           message: 'Failed to verify email token: invalid verification token was submitted.'     
-                        })
-                    }
-                })
-                .catch(err=>{
-                    return res.status(500).json({
-                        success: false,
-                        message: 'Something wrong happeded to our server.'
+                const match = await bcrypt.compare(verificationCode, hashedCode);
+                if (match){
+                    await pool.query(confirmedEmail_sql,[userId]);
+                    return res.status(200).json({
+                        success: true,
+                        message: 'successfully verified email'
                     })
-                })
+                }
+                else {
+                    return res.status(401).json({
+                       success: false,
+                       message: 'Failed to verify email token: invalid verification token was submitted.'     
+                    })
+                }
             }
             else {
                 return res.status(401).json({
@@ -178,6 +196,7 @@ router.post('/confirmEmail', async (req, res) =>{
         }
     }
     catch(err){
+        console.log(err);
         return res.status(400).json({
             success: false,
             message: err

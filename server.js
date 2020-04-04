@@ -4,7 +4,6 @@ const morgan = require('morgan');
 const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 5000;
-const db = require('./db');
 const bodyParser = require('body-parser');
 const router = require('./routes');
 
@@ -14,6 +13,7 @@ if (process.env.NODE_ENV === "production") {
 }
 app.use(cors());
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan('combined'));
 
 //below must be set before using res.sendFile:
