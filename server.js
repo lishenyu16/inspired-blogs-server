@@ -21,9 +21,10 @@ app.use(express.static(path.join(__dirname, 'views')));
 app.use(express.static('public')); //static middleware can be called mutiple times until a file is found
 
 router(app);
-app.get('/', function(req, res) {
-    res.sendFile(__dirname, "build", "index.html");
-});
+// app.get('/', function(req, res) {
+//     console.log('is getting /')
+//     res.sendFile(__dirname, "build", "index.html");
+// });
 
 app.get('/robots.txt', (req,res)=>{
     res.sendFile(__dirname,"public/robots.txt");
