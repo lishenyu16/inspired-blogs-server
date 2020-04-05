@@ -271,11 +271,13 @@ router.post('/forgotPassword', async (req, res) => {
 })
 router.post('/resetPassword', async (req, res) => {
     try {
-        let verificationCode = req.body.verificationCode;
+        let saltRounds = 10;
+        let verificationCode = req.body.code;
         let userId = req.body.userId;
         let password = req.body.password;
         let pendinguser_sql = `select * from accounts where user_id = $1`;
         let updatePw_sql = `update accounts set password = $1 where user_id = $2`;
+        const pw_hash = await bcrypt.hash(password, saltRounds);
         const result = await pool.query(pendinguser_sql,[userId]);
         if (result.rows.length > 0){
             let user = result.rows[0];
@@ -285,7 +287,7 @@ router.post('/resetPassword', async (req, res) => {
             if (currentTime <= hashExpirationTime){
                 const match = await bcrypt.compare(verificationCode, hashedCode);
                 if (match){
-                    await pool.query(updatePw_sql,[password,userId]);
+                    await pool.query(updatePw_sql,[pw_hash,userId]);
                     return res.status(200).json({
                         success: true,
                         message: 'successfully updated password'
