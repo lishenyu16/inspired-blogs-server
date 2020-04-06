@@ -110,6 +110,7 @@ router.post('/signUp', async (req, res) => {
             let verificationCode = uuid();
             const verificationHash = await bcrypt.hash(verificationCode, saltRounds);
             const result_userId = await pool.query(queryInsert,[username,pw_hash,email,new Date(),verificationHash,new Date().getTime()+24*60*60*1000]);
+            console.log('result_userID.rows:', result_userId.rows[0]);
             sgMail.send({
                 to: email,
                 from: 'inspiredblogs@gmail.com',
@@ -118,19 +119,19 @@ router.post('/signUp', async (req, res) => {
                     `<h1>Please verify your email by clicking on the following link:</h1>
                     <div style="width:100%;text-align:center;">
                         <a style="padding:5px;background-color:cyan;text-decoration:none" 
-                        href="http://shenyu16.com/confirmEmail/${verificationCode}/${result.rows[0].user_id}">Confirm Email Address</a>
+                        href="http://shenyu16.com/confirmEmail/${verificationCode}/${result_userId.rows[0].user_id}">Confirm Email Address</a>
                     </div>
                     <div style="width:100%;text-align:center;">
-                        or copy this link to your browser: <b>http://shenyu16.com/confirmEmail/${verificationCode}/${result.rows[0].user_id}</b>
+                        or copy this link to your browser: <b>http://shenyu16.com/confirmEmail/${verificationCode}/${result_userId.rows[0].user_id}</b>
                     </div>`
                     :
                     `<h1>Please verify your email by clicking on the following link:</h1>
                     <div style="width:100%;text-align:center;">
                         <a style="padding:5px;background-color:cyan;text-decoration:none" 
-                        href="http://localhost:8080/confirmEmail/${verificationCode}/${result.rows[0].user_id}">Confirm Email Address</a>
+                        href="http://localhost:8080/confirmEmail/${verificationCode}/${result_userId.rows[0].user_id}">Confirm Email Address</a>
                     </div>
                     <div style="width:100%;text-align:center;">
-                        or copy this link to your browser: <b>http://localhost:8080/confirmEmail/${verificationCode}/${result.rows[0].user_id}</b>
+                        or copy this link to your browser: <b>http://localhost:8080/confirmEmail/${verificationCode}/${result_userId.rows[0].user_id}</b>
                     </div>`
             })
             .then(re=>{
