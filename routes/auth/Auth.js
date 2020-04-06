@@ -118,7 +118,7 @@ router.post('/signUp', async (req, res) => {
                     `<h1>Please verify your email by clicking on the following link:</h1>
                     <div style="width:100%;text-align:center;">
                         <a style="padding:5px;background-color:cyan;text-decoration:none" 
-                        href="http://shenyu16.com/confirmEmail/${verificationCode}/${result_userId.rows[0].user_id}">Confirm Email Address</a>
+                        href="http://shenyu16.com/confirmEmail/${verificationCode}/${result.rows[0].user_id}">Confirm Email Address</a>
                     </div>
                     <div style="width:100%;text-align:center;">
                         or copy this link to your browser: <b>http://shenyu16.com/confirmEmail/${verificationCode}/${result.rows[0].user_id}</b>
@@ -127,7 +127,7 @@ router.post('/signUp', async (req, res) => {
                     `<h1>Please verify your email by clicking on the following link:</h1>
                     <div style="width:100%;text-align:center;">
                         <a style="padding:5px;background-color:cyan;text-decoration:none" 
-                        href="http://localhost:8080/confirmEmail/${verificationCode}/${result_userId.rows[0].user_id}">Confirm Email Address</a>
+                        href="http://localhost:8080/confirmEmail/${verificationCode}/${result.rows[0].user_id}">Confirm Email Address</a>
                     </div>
                     <div style="width:100%;text-align:center;">
                         or copy this link to your browser: <b>http://localhost:8080/confirmEmail/${verificationCode}/${result.rows[0].user_id}</b>
