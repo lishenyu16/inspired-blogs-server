@@ -2,18 +2,16 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const pool = require('../../db/index');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
-const sendgridTransport = require('nodemailer-sendgrid-transport');
+const winston = require('../middleware/logger');
+// const nodemailer = require('nodemailer');
+// // const sendgridTransport = require('nodemailer-sendgrid-transport');
+const sgMail = require('@sendgrid/mail');
 const isAuthMiddleware = require('./../middleware/isAuth');
 const router = express.Router();
 const uuid = require('uuid/v4');
 
-const transporter = nodemailer.createTransport(sendgridTransport({
-    auth:{
-        // api_user: '',
-        api_key:'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'
-    }
-}))
+sgMail.setApiKey('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');
+
 function jwtSignUser (user) {
     return jwt.sign(user, 'somereallylongsecret', {
         expiresIn: '24h'
@@ -22,6 +20,7 @@ function jwtSignUser (user) {
 router.post('/signIn', async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
+    winston.info(`${req.originalUrl} - ${req.method} - ${req.ip} - signIn - email: ${email}, env: ${process.env.NODE_ENV}`);
     try {
         const query = `select * from accounts where email = $1`;
         const lastLoginSql = `update accounts set last_login = current_timestamp where email = $1`;
@@ -111,7 +110,7 @@ router.post('/signUp', async (req, res) => {
             let verificationCode = uuid();
             const verificationHash = await bcrypt.hash(verificationCode, saltRounds);
             const result_userId = await pool.query(queryInsert,[username,pw_hash,email,new Date(),verificationHash,new Date().getTime()+24*60*60*1000]);
-            transporter.sendMail({
+            sgMail.send({
                 to: email,
                 from: 'inspiredblogs@gmail.com',
                 subject: 'Inspired Blogs Email Confirmation',
@@ -120,12 +119,18 @@ router.post('/signUp', async (req, res) => {
                     <div style="width:100%;text-align:center;">
                         <a style="padding:5px;background-color:cyan;text-decoration:none" 
                         href="http://shenyu16.com/confirmEmail/${verificationCode}/${result_userId.rows[0].user_id}">Confirm Email Address</a>
+                    </div>
+                    <div style="width:100%;text-align:center;">
+                        or copy this link to your browser: <b>http://shenyu16.com/confirmEmail/${verificationCode}/${result.rows[0].user_id}</b>
                     </div>`
                     :
                     `<h1>Please verify your email by clicking on the following link:</h1>
                     <div style="width:100%;text-align:center;">
                         <a style="padding:5px;background-color:cyan;text-decoration:none" 
                         href="http://localhost:8080/confirmEmail/${verificationCode}/${result_userId.rows[0].user_id}">Confirm Email Address</a>
+                    </div>
+                    <div style="width:100%;text-align:center;">
+                        or copy this link to your browser: <b>http://localhost:8080/confirmEmail/${verificationCode}/${result.rows[0].user_id}</b>
                     </div>`
             })
             .then(re=>{
@@ -220,7 +225,7 @@ router.post('/forgotPassword', async (req, res) => {
             let verificationCode = uuid();
             const verificationHash = await bcrypt.hash(verificationCode, saltRounds);
             const result_userId = await pool.query(queryUpdateHash,[verificationHash,new Date().getTime()+24*60*60*1000, email]);
-            transporter.sendMail({
+            sgMail.send({
                 to: email,
                 from: 'inspiredblogs@gmail.com',
                 subject: 'Inspired Blogs Reset Password',
