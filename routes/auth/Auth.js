@@ -119,19 +119,19 @@ router.post('/signUp', async (req, res) => {
                     `<h1>Please verify your email by clicking on the following link:</h1>
                     <div style="width:100%;text-align:center;">
                         <a style="padding:5px;background-color:cyan;text-decoration:none" 
-                        href="http://shenyu16.com/confirmEmail/${verificationCode}/${result_userId.rows[0].user_id}">Confirm Email Address</a>
+                        href="http://shenyu16.com/blogs/confirm-email/${verificationCode}/${result_userId.rows[0].user_id}">Confirm Email Address</a>
                     </div>
                     <div style="width:100%;text-align:center;">
-                        or copy this link to your browser: <b>http://shenyu16.com/confirmEmail/${verificationCode}/${result_userId.rows[0].user_id}</b>
+                        or copy this link to your browser: <b>http://shenyu16.com/blogs/confirm-email/${verificationCode}/${result_userId.rows[0].user_id}</b>
                     </div>`
                     :
                     `<h1>Please verify your email by clicking on the following link:</h1>
                     <div style="width:100%;text-align:center;">
                         <a style="padding:5px;background-color:cyan;text-decoration:none" 
-                        href="http://localhost:8080/confirmEmail/${verificationCode}/${result_userId.rows[0].user_id}">Confirm Email Address</a>
+                        href="http://localhost:8080/blogs/confirm-email/${verificationCode}/${result_userId.rows[0].user_id}">Confirm Email Address</a>
                     </div>
                     <div style="width:100%;text-align:center;">
-                        or copy this link to your browser: <b>http://localhost:8080/confirmEmail/${verificationCode}/${result_userId.rows[0].user_id}</b>
+                        or copy this link to your browser: <b>http://localhost:8080/blogs/confirm-email/${verificationCode}/${result_userId.rows[0].user_id}</b>
                     </div>`
             })
             .then(re=>{
@@ -234,20 +234,20 @@ router.post('/forgotPassword', async (req, res) => {
                     `<h1>Please verify your email by clicking on the following link:</h1>
                     <div style="width:100%;text-align:center;">
                         <a style="padding:5px;background-color:cyan;text-decoration:none" 
-                        href="http://shenyu16.com/resetPassword/${verificationCode}/${result.rows[0].user_id}">Confirm Email Address</a>
+                        href="http://shenyu16.com/blogs/reset-password/${verificationCode}/${result.rows[0].user_id}">Confirm Email Address</a>
                     </div>
                     <div style="width:100%;text-align:center;">
-                        or copy this link to your browser: <b>http://shenyu16.com/resetPassword/${verificationCode}/${result.rows[0].user_id}</b>
+                        or copy this link to your browser: <b>http://shenyu16.com/blogs/reset-password/${verificationCode}/${result.rows[0].user_id}</b>
                     </div>
                     `
                     :
                     `<h1>Please verify your email by clicking on the following link:</h1>
                     <div style="width:100%;text-align:center;">
                         <a style="padding:5px;background-color:cyan;text-decoration:none" 
-                        href="http://localhost:8080/resetPassword/${verificationCode}/${result.rows[0].user_id}">Confirm Email Address</a>
+                        href="http://localhost:8080/blogs/reset-password/${verificationCode}/${result.rows[0].user_id}">Confirm Email Address</a>
                     </div>
                     <div style="width:100%;text-align:center;">
-                        or copy this link to your browser: <b>http://localhost:8080/resetPassword/${verificationCode}/${result.rows[0].user_id}</b>
+                        or copy this link to your browser: <b>http://localhost:8080/blogs/reset-password/${verificationCode}/${result.rows[0].user_id}</b>
                     </div>
                     `
             })
