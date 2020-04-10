@@ -61,12 +61,15 @@ router.get('/getProfile/:targetId', isAuthMiddleware, async (req,res) => {
         if (userId != targetId){
             // return blog that is not private
             const query_targetProfile = `select username, public_info, created_on from accounts where user_id = $1`;
-            const result = await pool.query(query_targetProfile, [targetId]);
-            if (result.rows.length>0){
+            let sql_blogs = `select * from blogs where user_id = $1 and is_private = false`;
+            const result_profile = await pool.query(query_targetProfile, [targetId]);
+            const result_blogs = await pool.query(sql_blogs, [targetId]);
+            if (result_profile.rows.length>0){
                 return res.status(200).json({
                     success: true,
-                    data: result.rows[0],
-                    isSelf: false
+                    profileData: result_profile.rows[0],
+                    blogsData: result_blogs.rows,
+                    isSelf: false,
                 })
             }
             else {
