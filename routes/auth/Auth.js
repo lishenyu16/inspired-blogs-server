@@ -328,27 +328,8 @@ router.post('/resetPassword', async (req, res) => {
         })
     }
 })
-router.post('/updateProfile', isAuthMiddleware, async (req, res) => {
-    const userId = req.userId;
-    const username = req.body.username;
-    try {
-        const updateSql = `update accounts set username = $1 where user_id = $2 returning username`;
-        const result = await pool.query(updateSql, [username,userId]);
-        res.status(200).json({
-            success: true,
-            message: 'Successfully updates profile',
-            username: result.rows[0].username,
-        })
-    }
-    catch(err){
-        console.log(err);
-        res.status(400).json({
-            success: false,
-            message: 'Failed to update profile, error: ' + err
-        })
-    }
-})
 router.post('/visitors', async (req, res) => {
+    console.log('req ip: ', req.ip);
     const {ip,city,state,country,latitude,longitude,time} = req.body;
     if (ip == '24.205.16.34'){
         return res.json({

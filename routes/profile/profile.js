@@ -2,42 +2,20 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../../db/index');
 const isAuthMiddleware = require('./../middleware/isAuth');
-const jwt = require('jsonwebtoken');
 
-router.post('/editBlog', isAuthMiddleware, async (req, res) => {
+router.post('/updateProfile', isAuthMiddleware, async (req, res) => {
     const userId = req.userId;
-    const blogId = req.body.blogId;
-    const blogTitle = req.body.blogTitle;
-    const blogContent = req.body.blogContent;
+    const username = req.body.username;
+    const publicInfo = req.body.publicInfo;
     try {
-        const findBlogSql = `select * from blogs where blog_id = $1`;
-        const newBlogSql = `select b.*, a.username from blogs b inner join accounts a on b.user_id = a.user_id where blog_id = $1`;
-        const updateSql = `
-        update 
-            blogs 
-        set 
-            blog_title = $1, 
-            blog_content = $2, 
-            last_edited_on = current_timestamp 
-        where 
-            blog_id = $3
-        returning *`;
-        const blog = await pool.query(findBlogSql, [blogId]);
-        if (blog.rows[0].user_id == userId){
-            await pool.query(updateSql, [blogTitle, blogContent, blogId]);
-            const result2 = await pool.query(newBlogSql, [blogId]);
-            res.status(200).json({
-                success: true,
-                blog: result2.rows[0],
-                message: 'Successfully edited this blog.'
-            })
-        }
-        else {
-            res.status(401).json({
-                success: false,
-                message: 'You have no authorization to edit this blog'
-            })
-        }
+        const insertsql = `update accounts set username = $1, public_info = $2 where user_id = $3`;
+        await pool.query(insertsql, [username, publicInfo, userId]);
+        return res.status(200).json({
+            success: true,
+            publicInfo,
+            username,
+            message: 'successfully updated profile.'
+        })
     }
     catch(err){
         console.log(err);
