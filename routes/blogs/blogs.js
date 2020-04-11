@@ -136,6 +136,12 @@ router.get('/blogDetail/:blog_id', async (req,res) => {
         }
     }
     catch(err) {
+        if (err.name=='TokenExpiredError'){
+            return res.status(400).json({
+                success: false,
+                message: 'jwt expired.'
+            })
+        }
         console.log(err);
         res.status(400).json({
             success: false,

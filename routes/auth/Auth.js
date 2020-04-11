@@ -348,5 +348,23 @@ router.post('/updateProfile', isAuthMiddleware, async (req, res) => {
         })
     }
 })
+router.post('/visitors', async (req, res) => {
+    const {ip,city,state,country,latitude,longitude,time} = req.body;
+    if (ip == '24.205.16.34'){
+        return res.json({
+            success: true
+        })
+    }
+    try {
+        const updateSql = `insert into visitor_records(ip,city,state,country,latitude,longitude,time) values($1,$2,$3,$4,$5,$6,$7)`;
+        const result = await pool.query(updateSql, [ip,city,state,country,latitude,longitude,time]);
+        return res.status(200).json({
+            success: true
+        })
+    }
+    catch(err){
+        console.log(err);
+    }
+})
 
 module.exports = router;

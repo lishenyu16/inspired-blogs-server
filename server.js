@@ -13,6 +13,7 @@ const winston = require('./routes/middleware/logger');
 //     app.use(express.static(path.join(__dirname, 'views')));
 // }
 app.use(cors());
+app.set('trust proxy', true)
 app.use(compression());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
