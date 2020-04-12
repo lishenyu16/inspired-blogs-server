@@ -150,6 +150,36 @@ router.get('/blogDetail/:blog_id', async (req,res) => {
     }
 })
 
+router.post('/deleteBlog', isAuthMiddleware, async (req, res)=>{
+    const userId = req.userId;
+    const blog_id = req.body.blogId;
+    try {
+        let queryBlog = `select user_id from blogs where blog_id = $1`;
+        let deleteSql = `delete from blogs where blog_id = $1`;
+        const result = await pool.query(queryBlog,[blog_id]);
+        if (userId == result.rows[0].user_id){
+            await pool.query(deleteSql,[blog_id]);
+            return res.status(200).json({
+                success: true,
+                message: 'successfully deleted this post'
+            })
+        }
+        else {
+            return res.status(401).json({
+                success: false,
+                message: 'Not authorized'
+            })
+        }
+    }
+    catch(err){
+        console.log(err);
+        return res.status(400).json({
+            success: false,
+            message: err
+        })
+    }
+})
+
 module.exports = router;
 
 
