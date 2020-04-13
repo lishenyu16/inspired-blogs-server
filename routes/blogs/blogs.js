@@ -8,9 +8,11 @@ router.post('/addBlog', isAuthMiddleware, async (req, res) => {
     const userId = req.userId;
     const blogTitle = req.body.blogTitle;
     const blogContent = req.body.blogContent;
+    const blogCategory = req.body.blogCategory;
+
     try {
-        const addBlogSql = `insert into blogs (user_id, blog_title, blog_content, created_on) values ($1,$2,$3,current_timestamp)`;
-        const result = await pool.query(addBlogSql, [userId, blogTitle, blogContent]);
+        const addBlogSql = `insert into blogs (user_id, blog_title, blog_content, created_on, category_id) values ($1,$2,$3,current_timestamp, $4)`;
+        const result = await pool.query(addBlogSql, [userId, blogTitle, blogContent, blogCategory]);
         res.status(200).json({
             success: true,
             message: 'Successfully created a blog!'
@@ -29,6 +31,7 @@ router.post('/editBlog', isAuthMiddleware, async (req, res) => {
     const blogId = req.body.blogId;
     const blogTitle = req.body.blogTitle;
     const blogContent = req.body.blogContent;
+    const blogCategory = req.body.blogCategory;
     try {
         const findBlogSql = `select * from blogs where blog_id = $1`;
         const newBlogSql = `select b.*, a.username from blogs b inner join accounts a on b.user_id = a.user_id where blog_id = $1`;
@@ -38,13 +41,14 @@ router.post('/editBlog', isAuthMiddleware, async (req, res) => {
         set 
             blog_title = $1, 
             blog_content = $2, 
+            category_id = $3,
             last_edited_on = current_timestamp 
         where 
-            blog_id = $3
+            blog_id = $4
         returning *`;
         const blog = await pool.query(findBlogSql, [blogId]);
         if (blog.rows[0].user_id == userId){
-            await pool.query(updateSql, [blogTitle, blogContent, blogId]);
+            await pool.query(updateSql, [blogTitle, blogContent,blogCategory, blogId]);
             const result2 = await pool.query(newBlogSql, [blogId]);
             res.status(200).json({
                 success: true,
@@ -70,7 +74,7 @@ router.post('/editBlog', isAuthMiddleware, async (req, res) => {
 
 router.get('/fetchBlogs', async (req,res) => {
     try {
-        const query = `select b.*, a.username from blogs b inner join accounts a on b.user_id = a.user_id where b.is_private = false`;
+        const query = `select b.*, a.username from blogs b inner join accounts a on b.user_id = a.user_id where b.is_private = false order by b.blog_id desc`;
         const result = await pool.query(query);
         res.status(200).json({
             success: true,
