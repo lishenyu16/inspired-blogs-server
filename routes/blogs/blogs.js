@@ -184,6 +184,65 @@ router.post('/deleteBlog', isAuthMiddleware, async (req, res)=>{
     }
 })
 
+router.get('/categories', async (req, res)=>{
+    try {
+        let sql = `
+        select 
+            c.category_id, c.description, count(b.category_id) 
+        from 
+            blogs b 
+        right join 
+            categories c 
+        on 
+            b.category_id = c.category_id 
+            and b.is_private = false	
+        group by 
+            c.category_id,c.description
+        order by category_id asc
+        `;
+        const result = await pool.query(sql);
+        return res.status(200).json({
+            success: true,
+            data: result.rows,
+        })
+    }
+    catch(err){
+        return res.status(400).json({
+            success: false,
+            message: 'something wrong happeded to the server, please try again later'
+        })
+    }
+})
+
+router.get('/categories/:name', async (req, res)=>{
+    try {
+        const description = req.params.name;
+        let sql = `
+        select 
+            b.blog_id, b.blog_title, b.created_on
+        from 
+            blogs b 
+        left join 
+            categories c 
+        on 
+            b.category_id = c.category_id 
+        where 
+            b.is_private = false 
+            and c.description = $1`;
+        const result = await pool.query(sql, [description]);
+        return res.status(200).json({
+            success: true,
+            data: result.rows,
+        })
+    }
+    catch(err){
+        return res.status(400).json({
+            success: false,
+            message: 'something wrong happeded to the server, please try again later'
+        })
+    }
+})
+
 module.exports = router;
 
 
