@@ -74,7 +74,23 @@ router.post('/editBlog', isAuthMiddleware, async (req, res) => {
 
 router.get('/fetchBlogs', async (req,res) => {
     try {
-        const query = `select b.*, a.username from blogs b inner join accounts a on b.user_id = a.user_id where b.is_private = false order by b.blog_id desc`;
+        const query = `
+        select 
+            b.*, a.username, c.description
+        from 
+            blogs b 
+        inner join 
+            accounts a 
+        on 
+            b.user_id = a.user_id 
+        left join
+            categories c
+        on
+            b.category_id = c.category_id
+        where 
+            b.is_private = false 
+        order by 
+            b.blog_id desc`;
         const result = await pool.query(query);
         res.status(200).json({
             success: true,
