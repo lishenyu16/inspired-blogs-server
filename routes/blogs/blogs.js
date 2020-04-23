@@ -259,6 +259,35 @@ router.get('/categories/:name', async (req, res)=>{
     }
 })
 
+router.post('/switchPrivate', isAuthMiddleware, async (req, res)=>{
+    const userId = req.userId;
+    const blog_id = req.body.blogId;
+    try {
+        let queryBlog = `select user_id, is_private from blogs where blog_id = $1`;
+        let updatesql = `update blogs set is_private = $1 where blog_id = $2`;
+        const result = await pool.query(queryBlog,[blog_id]);
+        if (userId == result.rows[0].user_id){
+            await pool.query(updatesql, [!result.rows[0].is_private, blog_id]);
+            return res.status(200).json({
+                success: true,
+                message: 'successfully updated this post'
+            })
+        }
+        else {
+            return res.status(401).json({
+                success: false,
+                message: 'Not authorized'
+            })
+        }
+    }
+    catch(err){
+        console.log(err);
+        return res.status(400).json({
+            success: false,
+            message: err
+        })
+    }
+})
 module.exports = router;
 
 
