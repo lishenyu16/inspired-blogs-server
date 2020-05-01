@@ -105,14 +105,19 @@ router.get('/fetchBlogs', async (req,res) => {
     }
 })
 
-router.get('/blogDetail/:blog_id', async (req,res) => {
+router.get('/blogDetail/:blog_id/:increaseCount', async (req,res) => {
     try {
         let blog_id = req.params.blog_id;
+        let increaseCount = req.params.increaseCount;
         if (isNaN(blog_id) || blog_id < 0){
             return res.status(400).json({
                 success:false,
                 message:'Invalid blog id provided: ' + blog_id,
             })
+        }
+        if (increaseCount==false){
+            let viewsCount = `update blogs set views = views + 1 where blog_id = $1`;
+            await pool.query(viewsCount, [blog_id]);
         }
         const authHeader = req.get('Authorization');
         if(!authHeader){
