@@ -115,9 +115,9 @@ router.get('/blogDetail/:blog_id/:increaseCount', async (req,res) => {
                 message:'Invalid blog id provided: ' + blog_id,
             })
         }
-        if (increaseCount==false){
-            let viewsCount = `update blogs set views = views + 1 where blog_id = $1`;
-            await pool.query(viewsCount, [blog_id]);
+        if (increaseCount=='true'){
+            let viewsCount = `update blogs set views = views + 1 where blog_id = $1 returning views`;
+            let re = await pool.query(viewsCount, [blog_id]);
         }
         const authHeader = req.get('Authorization');
         if(!authHeader){
