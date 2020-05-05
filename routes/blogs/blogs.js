@@ -11,7 +11,10 @@ router.post('/addBlog', isAuthMiddleware, async (req, res) => {
     const blogCategory = req.body.blogCategory;
 
     try {
-        const addBlogSql = `insert into blogs (user_id, blog_title, blog_content, created_on, category_id) values ($1,$2,$3,current_timestamp, $4)`;
+        const addBlogSql = `
+        insert into 
+            blogs (user_id, blog_title, blog_content, created_on, category_id, views) 
+            values ($1,$2,$3,current_timestamp, $4, 0)`;
         const result = await pool.query(addBlogSql, [userId, blogTitle, blogContent, blogCategory]);
         res.status(200).json({
             success: true,
