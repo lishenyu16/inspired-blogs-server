@@ -12,6 +12,7 @@ const winston = require('./routes/middleware/logger');
 // if (process.env.NODE_ENV === "production") {
 //     app.use(express.static(path.join(__dirname, 'views')));
 // }
+app.disable('x-powered-by');
 app.use(cors());
 app.set('trust proxy', true)
 app.use(compression());
@@ -19,7 +20,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(morgan('combined'));
 app.use(morgan('combined', { stream: winston.stream }));
-
+app.disable('x-powered-by');
 //below must be set before using res.sendFile:
 app.use(express.static(path.join(__dirname, 'views')));
 app.use(express.static('public')); //static middleware can be called mutiple times until a file is found

@@ -252,7 +252,10 @@ router.get('/categories/:name', async (req, res)=>{
             b.category_id = c.category_id 
         where 
             b.is_private = false 
-            and c.description = $1`;
+            and c.description = $1
+        order by 
+            b.created_on desc`
+        ;
         const result = await pool.query(sql, [description]);
         return res.status(200).json({
             success: true,
