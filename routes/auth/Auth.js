@@ -47,6 +47,7 @@ router.post('/signIn', async (req, res) => {
                         userId: user.user_id,
                         email: user.email,
                     })
+                    console.log(token)
                     res.status(200).json({
                         success: true,
                         token: token,
