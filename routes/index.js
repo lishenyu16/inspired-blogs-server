@@ -2,6 +2,7 @@
 const authRouter = require('./auth/Auth');
 const stockAuthRouter = require('./stocks/auth');
 const quotesRouter = require('./stocks/quotes');
+const userStocksRouter = require('./stocks/userStocks');
 const blogsStaticRouter = require('./blogs/staticRouterBlogs');
 const stocksStaticRouter = require('./stocks/staticRouterStocks');
 const blogsRouter = require('./blogs/blogs');
@@ -17,5 +18,6 @@ module.exports = (app) => {
     app.use('/api/profile', profileRouter);
     app.use('/api/s3', s3Router);
     app.use('/api/stocktrader/quotes', quotesRouter);
+    app.use('/api/stocktrader/userStocks', userStocksRouter);
     app.use('/api/stocktrader/auth', stockAuthRouter);
 }
