@@ -30,11 +30,11 @@ router(app);
 app.get('/robots.txt', (req,res)=>{
     res.sendFile(__dirname,"public/robots.txt");
 })
-app.get('/ip', (req, res) =>{
-    res.json({
-        ip: req.ip
-    })
-})
+// app.get('/ip', (req, res) =>{
+//     res.json({
+//         ip: req.ip
+//     })
+// })
 
 app.listen(port,()=>{
     console.log(`Server is listening to ${port}`)
