@@ -6,11 +6,13 @@ const winston = require('../middleware/logger');
 // const nodemailer = require('nodemailer');
 // // const sendgridTransport = require('nodemailer-sendgrid-transport');
 const sgMail = require('@sendgrid/mail');
-const isAuthMiddleware = require('./../middleware/isAuth');
+// const isAuthMiddleware = require('./../middleware/isAuth');
 const router = express.Router();
 const uuid = require('uuid/v4');
+const dotenv = require('dotenv');
+dotenv.config();
 
-sgMail.setApiKey('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');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 function jwtSignUser (user) {
     return jwt.sign(user, 'somereallylongsecret', {
