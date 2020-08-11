@@ -3,10 +3,12 @@ const router = express.Router();
 const isAuthMiddleware = require('../middleware/isAuth');
 const AWS = require('aws-sdk');
 const multer = require('multer');
+const dotenv = require('dotenv');
+dotenv.config();
 
 // Enter copied or downloaded access ID and secret key here
-const ID = 'AKIAJ72NZV7JF3LLR6TQ';
-const SECRET = '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';
+const ID = process.env.ID;
+const SECRET = process.env.SECRET;
 // The name of the bucket that you have created
 const BUCKET_NAME = 'inspiredblogs';
 const s3 = new AWS.S3({
